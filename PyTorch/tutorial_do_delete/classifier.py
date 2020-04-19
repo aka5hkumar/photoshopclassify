@@ -20,8 +20,8 @@ def imshow(img):
 dataiter = iter(trainloader)
 images, labels = dataiter.next()
 
-imshow(torchvision.utils.make_grid(images))
-print (' '.join('%5s' % classes[labels[j]] for j in range(4)))
+#imshow(torchvision.utils.make_grid(images))
+#print (' '.join('%5s' % classes[labels[j]] for j in range(4)))
 
 import torch.nn as nn
 import torch.nn.functional as F
@@ -30,9 +30,9 @@ import torch.nn.functional as F
 class Net(nn.Module):
     def __init__(self):
         super(Net, self).__init__()
-        self.conv1 = nn.Conv2d(3, 6, 5)
+        self.conv1 = nn.Conv2d(3, 10, 5)
         self.pool = nn.MaxPool2d(2, 2)
-        self.conv2 = nn.Conv2d(6, 16, 5)
+        self.conv2 = nn.Conv2d(10, 16, 5)
         self.fc1 = nn.Linear(16 * 5 * 5, 120)
         self.fc2 = nn.Linear(120, 84)
         self.fc3 = nn.Linear(84, 10)
@@ -50,6 +50,13 @@ class Net(nn.Module):
 net = Net()
 
 import torch.optim as optim
+device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
+
+# Assuming that we are on a CUDA machine, this should print a CUDA device:
+
+print(device)
+
+net.to(device)
 
 criterion = nn.CrossEntropyLoss()
 optimizer = optim.SGD(net.parameters(), lr=0.001, momentum=0.9)
@@ -60,7 +67,6 @@ def trainNet():
         for i, data in enumerate(trainloader, 0):
             # get the inputs; data is a list of [inputs, labels]
             inputs, labels = data
-
             # zero the parameter gradients
             optimizer.zero_grad()
 
@@ -79,7 +85,7 @@ def trainNet():
 
     print('Finished Training')
 
-#trainNet()
+trainNet()
 PATH = './cifar_net.pth'
 torch.save(net.state_dict(), PATH)
 dataiter = iter(testloader)
@@ -87,3 +93,17 @@ images, labels = dataiter.next()
 
 imshow(torchvision.utils.make_grid(images))
 print('GroundTruth: ', ' '.join('%5s' % classes[labels[j]] for j in range(4)))
+
+#Check accuracy
+correct = 0
+total = 0
+with torch.no_grad():
+    for data in testloader:
+        images, labels = data
+        outputs = net(images)
+        _, predicted = torch.max(outputs.data, 1)
+        total += labels.size(0)
+        correct += (predicted == labels).sum().item()
+
+print('Accuracy of the network on the 10000 test images: %d %%' % (
+    100 * correct / total))
