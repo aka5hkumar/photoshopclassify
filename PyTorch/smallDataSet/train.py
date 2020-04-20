@@ -9,6 +9,10 @@ import torch.nn.functional as F
 import torch.optim as optim
 #based on https://pythonprogramming.net/gpu-deep-learning-neural-network-pytorch/
 
+
+#look at https://lelon.io/blog/2018/02/08/pytorch-with-baby-steps
+
+
 class photoShopped():
     img_Size = 1000
     Photoshop = "./data/photoShopped"
@@ -49,6 +53,7 @@ class Net(nn.Module):
 
         self.fc1 = nn.Linear(self._to_linear,512)
         self.fc2 = nn.Linear(512,2)
+        #logistic layer?
 
     def convs(self, x):
         # max pooling over 2x2
