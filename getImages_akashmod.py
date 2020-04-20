@@ -26,10 +26,11 @@ class RedditGetImages:
                 post_id=resp_json['data']['children'][post_number]['data']['id']
                 post_img=resp_json['data']['children'][post_number]['data']['url']
                 posts_list.append([post_id,post_img])
-            return posts_list
+            print(posts_list)
+            #return posts_list
         else:
             print(resp_post)
-            return -1
+            #return -1
 
     def getComments(self,post_id): # Get post IDs and respective images, returns one list
         resp_comm = requests.get('{}/comments/{}.json?depth=1'.format(self.url,post_id))
@@ -104,7 +105,7 @@ if __name__ == "__main__":
     limit = 10
     search_filter = 'top'
     API = RedditGetImages(url)
-    API.main(limit,search_filter)
-
+    #API.main(limit,search_filter)
+    API.getPosts(limit,search_filter)
 
 
