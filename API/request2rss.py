@@ -13,7 +13,7 @@ def getPosts(url, limit):
             posts_dict[post_id]=post_img
             #print(post_img.rsplit("/",1)[1])
             image = requests.get(post_img, allow_redirects=True)
-            open('data/postImage/'+post_img.rsplit("/",1)[1], 'wb').write(image.content)
+            open('./data/postImage/'+post_img.rsplit("/",1)[1], 'wb').write(image.content)
     return posts_dict
 
 if __name__ == "__main__":
