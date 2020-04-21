@@ -1,11 +1,5 @@
 import requests
 
-import os.path
-# x = requests.get('https://www.reddit.com/r/photoshopbattles/top/.json?count=20', headers = {'User-agent': 'photoshopbot'})
-# print(x.status_code)
-# x = x.json()
-# print(x[1])
-
 def getPosts(url, limit):
     top_Posts = requests.get(url+'/top/.json?count='+str(limit), headers = {'User-agent': 'photoshopbot2'})
     if top_Posts.status_code != 200:
