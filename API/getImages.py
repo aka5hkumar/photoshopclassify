@@ -1,111 +1,71 @@
 # -*- coding: utf-8 -*-
 """
-Created on Fri Apr 17 10:39:52 2020
+Created on Tue Apr 21 09:32:28 2020
 
 @author: njord
 """
-
 #!/usr/bin/env python
 # coding: utf-8
 import requests
-import json
 import os
+import imgur_downloader as ImgurDownloader
 
-class redditGetImages():
-    def __init__(self,url,search_filter,limit):
-        self.url = url 
-        self.limit = limit
-        self.search_filter = search_filter
-        
-    def getPosts(self): # Get post IDs and respective images, returns one list
-        resp_post = requests.get('{}/{}.json?t=all&limit={}'.format(self.url,self.search_filter,self.limit)) 
-        posts_list=[]
-        if str(resp_post)=='<Response [200]>':
-            resp_json=json.loads(resp_post.text)
-            for post_number in range(0,self.limit):
-                post_id=resp_json['data']['children'][post_number]['data']['id']
-                post_img=resp_json['data']['children'][post_number]['data']['url']
-                posts_list.append([post_id,post_img])
-            return posts_list
+def getImages(url, search_filter, limit, posts_dict=None):
+    if not posts_dict: # If no posts are passed, get post IDs and Images
+        print('Getting Posts')
+        resp = requests.get(url+'/'+search_filter+'/.json?count='+str(limit), headers = {'User-agent': 'photoshopbot2'})
+        if resp.ok:
+            resp_json=resp.json()
+            posts_dict={}
+            for post_number in range(0, limit):
+                post_id=resp_json['data']['children'][post_number]['data']['id']# get ID
+                post_img=resp_json['data']['children'][post_number]['data']['url']# get img link
+                posts_dict[post_id]=post_img # add to Dict                
+            #     image = requests.get(post_img, allow_redirects=True, stream=True) #Request image
+            #     filename = ('./data/Images/'+post_id+'/p_'+post_img.rsplit("/",1)[1])
+            #     os.makedirs(os.path.dirname(filename), exist_ok=True)
+            #     open('./data/Images/'+post_id+'/p_'+post_img.rsplit("/",1)[1], 'wb').write(image.content) #save image
+            getImages(url,search_filter,limit,posts_dict) # Recursive call with post dicitonary
         else:
-            print(resp_post)
-            return -1
-
-    def getComments(self,post_id): # Get post IDs and respective images, returns one list
-        resp_comm = requests.get('{}/comments/{}.json?depth=1'.format(self.url,post_id))
-        comms_list=[]
-        if str(resp_comm)=='<Response [200]>':
-            resp_comm_json=json.loads(resp_comm.text)
-            for comment_number in range(0,10):
-                comm_img=resp_comm_json[1]['data']['children'][comment_number]['data']['body']
-                comm_img=self.cleanComment(comm_img)
-                comm_id=resp_comm_json[1]['data']['children'][comment_number]['data']['id']
-                comms_list.append([post_id,comm_id,comm_img])
-            return comms_list
-        else:
-            print('{} getting comments for post ID: {}'.format(resp_comm,post_id))
-            return -1
-            
-    def cleanComment(self,comment):# Clean comment for URL. This needs working on 
-        if comment.find("(")==-1: 
-            return comment
-        else:
-            comment=comment[comment.find("(")+1:comment.find(")")]
-            return comment
-        
+            print (resp.reason)
+    else: # If posts are passed, get comment IDs and Images for each post
+        print('Getting Comments')
+        for post_id in posts_dict.keys():
+            resp = requests.get(url+'/comments/'+post_id+'.json?depth=1', headers = {'User-agent': 'photoshopbot2'})
+            if resp.ok:
+                resp_json=resp.json()
+                comment_dict={}
+                for count, commment in enumerate(resp_json[1]['data']['children']):
+                    if count == 9: # count starts at 0
+                        break
+                    else:    
+                        comm_id=commment['data']['id']
+                        try:
+                            comm_img=commment['data']['body_html'].rsplit('"')[3]
+                            if not(comm_img.endswith(('.jpg','.png','.gif', 'jpeg'))):
+                                if comm_img[-1] == '/':                                    pass
+                                else:
+                                    filename = ('./data/Images/'+post_id+'/commentImage/c_'+comm_img.rsplit("/",1)[1])
+                                    os.makedirs(os.path.dirname(filename), exist_ok=True)
+                                    ImgurDownloader(comm_img, './data/Images/'+post_id+'/commentImage/c_')
+                                #print(comm_img.rsplit('rel="image_src" href=')[1])
+                        except IndexError:
+                            count -= 1
+                            pass
+                        
+                        image = requests.get(comm_img, allow_redirects=True, stream=True) #Request image
+                        filename = ('./data/Images/'+post_id+'/commentImage/c_'+comm_img.rsplit("/",1)[1])
+                        os.makedirs(os.path.dirname(filename), exist_ok=True)
+                        open('./data/Images/'+post_id+'/commentImage/c_'+comm_img.rsplit("/",1)[1], 'wb').write(image.content) #save image
+            else:
+                print (resp.reason)
+if __name__=='__main__':     
+    url = 'https://www.reddit.com/r/photoshopbattles'
+    limit = 10
+    search_filter = 'top'
+    isPost=True
     
-    def downloadPostImages(self,posts):
-        for post in posts:
-            url = post[1]
-            post_id = post[0]
-            try:
-                resp = requests.get(url)
-                if resp.status_code == 200:
-                    with open(os.getcwd()+'/images/posts/'+post_id+'.jpg', 'wb') as file:
-                        file.write(resp.content)
-                        print('Saved Image to '+'/images/posts/'+post_id+'.jpg')
-            except:
-                print('Failed to download '+url)
-    
-    def downloadCommmentImages(self,comments):
-        for comment in comments:
-            url = comment[2]
-            comment_id = comment[1]
-            post_id = comment[0]
-            try:
-                resp = requests.get(url)
-                if resp.status_code == 200:
-                    with open(os.getcwd()+'/images/comments/'+post_id+'_'+comment_id+'.jpg', 'wb') as file:
-                        file.write(resp.content)
-                        print('Saved Image to '+'/images/comments/'+post_id+'_'+comment_id+'.jpg')
-            except:
-                print('Failed to download '+url)
-
-    def downloadAll(self):
-        post_list = self.getPosts()
-        
-        # Loop through comments of posts. I expect API to return 429 because of how much we are hitting it
-        batch_comments=[]
-        for post in post_list:
-            post_comments = API.getComments(post[0])
-            if post_comments != -1:
-                batch_comments+=post_comments
-        print(batch_comments)
-        # Save post images
-        self.downloadPostImages(post_list)
-        
-        # Save Comment Images
-        self.downloadCommmentImages(batch_comments)
-        
-        
-        
-        
-url = 'https://www.reddit.com/r/photoshopbattles'
-limit = 10
-search_filter = 'top'
-
-API = redditGetImages(url,search_filter,limit)
-API.downloadAll()
+    getImages(url,search_filter,limit)
 
 
 
