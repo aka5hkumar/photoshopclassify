@@ -39,16 +39,20 @@ def getImages(url, search_filter, limit, posts_dict=None):
                     else:    
                         comm_id=commment['data']['id']
                         try:
-                            comm_img=commment['data']['body_html'].rsplit('"')[3]
-
+                            comm_img_html=commment['data']['body_html'].rsplit('"')[3]
+                            comm_img = commment['data']['body']
+                            comm_img=comm_img[comm_img.find("(")+1:comm_img.find(")")]
+                            
+                            if not (comm_img_html == comm_img):
+                                print(comm_img,'|\t|',comm_img_html)
                         except IndexError:
                             count -= 1
                             pass
-                        comment_dict[comm_id]=comm_img # add to Dict
-                        image = requests.get(comm_img, allow_redirects=True, stream=True) #Request image
-                        filename = ('./data/Images/'+post_id+'/commentImage/c_'+comm_img.rsplit("/",1)[1])
-                        os.makedirs(os.path.dirname(filename), exist_ok=True)
-                        open('./data/Images/'+post_id+'/commentImage/c_'+comm_img.rsplit("/",1)[1], 'wb').write(image.content) #save image
+                        # comment_dict[comm_id]=comm_img # add to Dict
+                        # image = requests.get(comm_img, allow_redirects=True, stream=True) #Request image
+                        # filename = ('./data/Images/'+post_id+'/commentImage/c_'+comm_img.rsplit("/",1)[1])
+                        # os.makedirs(os.path.dirname(filename), exist_ok=True)
+                        # open('./data/Images/'+post_id+'/commentImage/c_'+comm_img.rsplit("/",1)[1], 'wb').write(image.content) #save image
             else:
                 print (resp.reason)
 if __name__=='__main__':     
@@ -58,6 +62,5 @@ if __name__=='__main__':
     isPost=True
     
     getImages(url,search_filter,limit)
-
 
 
