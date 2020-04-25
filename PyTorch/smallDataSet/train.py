@@ -10,8 +10,6 @@ import torch.optim as optim
 #based on https://pythonprogramming.net/gpu-deep-learning-neural-network-pytorch/
 
 
-#look at https://lelon.io/blog/2018/02/08/pytorch-with-baby-steps
-
 
 class photoShopped():
     img_Size = 1000
