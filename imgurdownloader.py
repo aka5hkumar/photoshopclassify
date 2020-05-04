@@ -479,4 +479,7 @@ def main(url, destination_folder, print_only=False):
 
 
 if __name__ == '__main__':
-    main()
+    img = 'https://imgur.com/a/PIBqAbF'
+    dest = './'
+    main(img, dest)
+

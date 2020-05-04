@@ -78,18 +78,13 @@ valid_sampler = SubsetRandomSampler(valid_idx)
 
 # prepare data loaders (combine dataset and sampler)
 
-def default_collate(batch):
-    data = torch.stack([item[0] for item in batch])
-    mask = [item[1] for item in batch]  # each element is of size (1, h*, w*). where (h*, w*) changes from mask to another.
-    target = torch.LongTensor([item[2] for item in batch])  # image labels.
-    return data, mask, target
-
-train_loader = DataLoader(train_data, batch_size=batch_size, sampler=train_sampler,collate_fn=default_collate)
-valid_loader = DataLoader(train_data, batch_size=batch_size, sampler=valid_sampler,collate_fn=default_collate)
+train_loader = DataLoader(train_data, batch_size=batch_size, sampler=train_sampler)
+valid_loader = DataLoader(train_data, batch_size=batch_size, sampler=valid_sampler)
 
 transforms_test = transforms.Compose([
     transforms.ToPILImage(),
     transforms.ToTensor(),
+    transforms.Resize((32,32)),
     transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))
 ])
 
@@ -98,8 +93,30 @@ sample_sub = pd.read_csv("data/Images/sample_submission.csv")
 test_data = CreateDataset(df_data=sample_sub, data_dir=test_path, transform=transforms_test)
 
 # prepare the test loader
-test_loader = DataLoader(test_data, batch_size=batch_size, shuffle=False,collate_fn=default_collate)
+test_loader = DataLoader(test_data, batch_size=batch_size, shuffle=False)
+    
+classes = [ 'No Cactus','Cactus']
+def imshow(img):
+    '''Helper function to un-normalize and display an image'''
+    # unnormalize
+    img = img / 2 + 0.5
+    # convert from Tensor image and display
+    plt.imshow(np.transpose(img, (1, 2, 0)))
+# obtain one batch of training images
+dataiter = iter(train_loader)
+images, labels  = dataiter.next()
+images = images.numpy() # convert images to numpy for display
 
+# plot the images in the batch, along with the corresponding labels
+fig = plt.figure(figsize=(25, 4))
+# display 20 images
+for idx in np.arange(1):
+    ax = fig.add_subplot(2, 20/2, idx+1, xticks=[], yticks=[])
+    imshow(images[idx])
+    ax.set_title(classes[labels[idx]])
+plt.show()
+
+'''
 
 class CNN(nn.Module):
     def __init__(self):
@@ -121,8 +138,8 @@ class CNN(nn.Module):
         # Set Dropout
         self.dropout = nn.Dropout(0.2)
         
-    def forward(self, input):
-        for i,x in enumerate(input):
+    def forward(self, input_x):
+        for x in input_x:
             # add sequence of convolutional and max pooling layers
             x = self.pool(F.relu(self.conv1(x)))
             x = self.pool(F.relu(self.conv2(x)))
@@ -228,4 +245,4 @@ for epoch in range(1, n_epochs+1):
         valid_loss_min,
         valid_loss))
         torch.save(model.state_dict(), 'best_model.pt')
-        valid_loss_min = valid_loss
+        valid_loss_min = valid_loss'''
