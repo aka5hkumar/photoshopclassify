@@ -9,6 +9,7 @@ Created on Tue Apr 21 09:32:28 2020
 import requests
 import os
 import imgur_downloader as Imgur
+import csv
 comment_arr=[]
 
 def getImages(url, search_filter, limit, posts_dict=None):
@@ -24,10 +25,10 @@ def getImages(url, search_filter, limit, posts_dict=None):
                 post_img=resp_json['data']['children'][post_number]['data']['url']# get img link
                 posts_dict[post_id]=post_img # add to Dict                
                 image = requests.get(post_img, allow_redirects=True, stream=True) #Request image
-                filename = ('./data/original'+'/p_'+post_img.rsplit("/",1)[1])
+                filename = ('./data/original/'+post_img.rsplit("/",1)[1])
                 #filename = ('./data/Images/'+post_id+'/p_'+post_img.rsplit("/",1)[1])
                 os.makedirs(os.path.dirname(filename), exist_ok=True)
-                open('./data/original'+'/p_'+post_img.rsplit("/",1)[1], 'wb').write(image.content)
+                open('./data/original/'+post_img.rsplit("/",1)[1], 'wb').write(image.content)
                 postArr.append([post_img.rsplit("/",1)[1], 0])
                 #open('./data/Images/'+post_id+'/p_'+post_img.rsplit("/",1)[1], 'wb').write(image.content) #save image
             getImages(url,search_filter,limit,posts_dict) # Recursive call with post dicitonary
@@ -54,7 +55,9 @@ def getImages(url, search_filter, limit, posts_dict=None):
                                     #filename = ('./data/Images/'+post_id+'/commentImage/'+comm_img.rsplit("/",1)[1])
                                     os.makedirs(os.path.dirname(filename), exist_ok=True)
                                     try:
-                                        Imgur.ImgurDownloader(comm_img, './data/photoShopped').save_images()
+                                        pass
+                                        #Imgur.ImgurDownloader(comm_img, './data/photoShopped').save_images()
+                                        #comment_arr.append([comm_img, 1])
                                         #comment_arr.append(post_id+comm_img.rsplit("/",1)[1])
                                         #Imgur.ImgurDownloader(comm_img, './data/Images/'+post_id+'/commentImage').save_images()
                                     except:
@@ -67,7 +70,7 @@ def getImages(url, search_filter, limit, posts_dict=None):
                                 #filename = ('./data/Images/'+post_id+'/commentImage/'+comm_img.rsplit("/",1)[1])
                                 os.makedirs(os.path.dirname(filename), exist_ok=True)
                                 open('./data/photoShopped/'+post_id+comm_img.rsplit("/",1)[1], 'wb').write(image.content)
-                                comment_arr.append([filename, 1])
+                                comment_arr.append([post_id+comm_img.rsplit("/",1)[1], 1])
                                 #open('./data/Images/'+post_id+'/commentImage/'+comm_img.rsplit("/",1)[1], 'wb').write(image.content) #save image
                         except IndexError:
                             count -= 1
@@ -76,13 +79,15 @@ def getImages(url, search_filter, limit, posts_dict=None):
             else:
                 print (resp.reason)
     
-    return comment_arr, postArr
+    csv_arr = comment_arr+postArr
+    print(csv_arr,'\t end')
+    with open("./data/data_labels.csv","w+",newline='') as my_csv:
+        csvWriter = csv.writer(my_csv,delimiter=',')
+        csvWriter.writerows(csv_arr)
+
 if __name__=='__main__':     
     url = 'https://www.reddit.com/r/photoshopbattles'
     limit = 10
     search_filter = 'top'
-    isPost=True
-    
-    print(getImages(url,search_filter,limit))
-
+    getImages(url, search_filter, limit)
 
