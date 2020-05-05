@@ -41,7 +41,7 @@ def getImages(url, search_filter, limit, posts_dict=None):
             if resp.ok:
                 resp_json=resp.json()
                 for count, commment in enumerate(resp_json[1]['data']['children']):
-                    if count == 9: # count starts at 0
+                    if count == 4: # count starts at 0
                         break
                     else:    
                         comm_id=commment['data']['id']
@@ -87,7 +87,7 @@ def getImages(url, search_filter, limit, posts_dict=None):
 
 if __name__=='__main__':     
     url = 'https://www.reddit.com/r/photoshopbattles'
-    limit = 10
+    limit = 20
     search_filter = 'top'
     getImages(url, search_filter, limit)
 

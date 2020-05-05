@@ -19,14 +19,14 @@ from torch.utils.data import TensorDataset, DataLoader, Dataset
 import torchvision
 import torch.optim as optim
 
-train_df = pd.read_csv("data/Images/train.csv") # need CSV of two cols : id = img path, shopped {0,1}
+train_df = pd.read_csv("./data/data_labels.csv") # need CSV of two cols : id = img path, shopped {0,1}
 
-print(f"Train Size: {len(os.listdir('data/Images/train/train'))}")
-print(f"Test Size: {len(os.listdir('data/Images/test/test'))}")
+print(f"Train Size: {len(os.listdir('./data/images/'))}")
+#print(f"Test Size: {len(os.listdir('./data/images/'))}")
 
 # Data paths
-train_path = 'data/Images/train/train'
-test_path = 'data/Images/test/test'
+train_path = 'data/images/'
+test_path = 'data/images/'
 
 # Our own custom class for datasets
 class CreateDataset(Dataset):
@@ -49,6 +49,7 @@ class CreateDataset(Dataset):
 
 transforms_train = transforms.Compose([
     transforms.ToPILImage(),
+    transforms.Resize((32,32)),
     transforms.RandomHorizontalFlip(),
     transforms.RandomRotation(10),
     transforms.ToTensor(),
@@ -80,7 +81,7 @@ valid_sampler = SubsetRandomSampler(valid_idx)
 
 train_loader = DataLoader(train_data, batch_size=batch_size, sampler=train_sampler)
 valid_loader = DataLoader(train_data, batch_size=batch_size, sampler=valid_sampler)
-
+'''
 transforms_test = transforms.Compose([
     transforms.ToPILImage(),
     transforms.ToTensor(),
@@ -94,8 +95,8 @@ test_data = CreateDataset(df_data=sample_sub, data_dir=test_path, transform=tran
 
 # prepare the test loader
 test_loader = DataLoader(test_data, batch_size=batch_size, shuffle=False)
-    
-classes = [ 'No Cactus','Cactus']
+'''
+classes = [ 'No Photoshop','Photoshop']
 def imshow(img):
     '''Helper function to un-normalize and display an image'''
     # unnormalize
@@ -110,13 +111,13 @@ images = images.numpy() # convert images to numpy for display
 # plot the images in the batch, along with the corresponding labels
 fig = plt.figure(figsize=(25, 4))
 # display 20 images
-for idx in np.arange(5):
+for idx in np.arange(15):
     ax = fig.add_subplot(2, 20/2, idx+1, xticks=[], yticks=[])
     imshow(images[idx])
     ax.set_title(classes[labels[idx]])
 plt.show()
 
-'''
+
 
 class CNN(nn.Module):
     def __init__(self):
@@ -138,24 +139,23 @@ class CNN(nn.Module):
         # Set Dropout
         self.dropout = nn.Dropout(0.2)
         
-    def forward(self, input_x):
-        for x in input_x:
-            # add sequence of convolutional and max pooling layers
-            x = self.pool(F.relu(self.conv1(x)))
-            x = self.pool(F.relu(self.conv2(x)))
-            x = self.pool(F.relu(self.conv3(x)))
-            x = self.pool(F.relu(self.conv4(x)))
-            # flatten image input
-            x = x.view(-1, 128 * 2 * 2)
-            # add dropout layer
-            x = self.dropout(x)
-            # add 1st hidden layer, with relu activation function
-            x = F.relu(self.fc1(x))
-            # add dropout layer
-            x = self.dropout(x)
-            # add 2nd hidden layer, with relu activation function
-            x = self.fc2(x)
-            return x
+    def forward(self, x):
+        # add sequence of convolutional and max pooling layers
+        x = self.pool(F.relu(self.conv1(x)))
+        x = self.pool(F.relu(self.conv2(x)))
+        x = self.pool(F.relu(self.conv3(x)))
+        x = self.pool(F.relu(self.conv4(x)))
+        # flatten image input
+        x = x.view(-1, 128 * 2 * 2)
+        # add dropout layer
+        x = self.dropout(x)
+        # add 1st hidden layer, with relu activation function
+        x = F.relu(self.fc1(x))
+        # add dropout layer
+        x = self.dropout(x)
+        # add 2nd hidden layer, with relu activation function
+        x = self.fc2(x)
+        return x
 
         # check if CUDA is available
 train_on_gpu = torch.cuda.is_available()
@@ -179,7 +179,7 @@ criterion = nn.CrossEntropyLoss()
 optimizer = optim.Adamax(model.parameters(), lr=0.001)
 
 # number of epochs to train the model
-n_epochs = 30
+n_epochs = 10
 
 valid_loss_min = np.Inf # track change in validation loss
 
@@ -245,4 +245,5 @@ for epoch in range(1, n_epochs+1):
         valid_loss_min,
         valid_loss))
         torch.save(model.state_dict(), 'best_model.pt')
-        valid_loss_min = valid_loss'''
+        valid_loss_min = valid_loss
+
