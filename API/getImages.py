@@ -23,6 +23,7 @@ def getImages(url, search_filter, limit, posts_dict=None):
             print(len(resp_json['data']['children']))
             print(resp_json['data']['after'])
             for post_number in range(0, limit):
+                print(post_number)
                 post_id=resp_json['data']['children'][post_number]['data']['id']# get ID
                 post_img=resp_json['data']['children'][post_number]['data']['url']# get img link
                 posts_dict[post_id]=post_img # add to Dict                
