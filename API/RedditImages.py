@@ -79,14 +79,29 @@ class GetImages:
         #self.makeCSV(csv_array)
         return csv_array
 
-    def makeCSV(self, csv_array):
-        with open("./data/data_labels.csv","a+",newline='') as my_csv:
-            csvWriter = csv.writer(my_csv,delimiter=',')
-            csvWriter.writerows(csv_array)
-            print ('Writing CSV')
-            #Does not remove duplicates!
+def makeCSV(csv_array):
+    with open("./data/data_labels.csv","w+",newline='') as my_csv:
+        csvWriter = csv.writer(my_csv,delimiter=',')
+        csvWriter.writerows(csv_array)
+        print ('Writing CSV')
+        #Does not remove duplicates!
 
-        
+
+def cleanImages():
+    csv_list=[]
+    for image in os.listdir('./data/images/'):
+        if not (image.endswith(('jpg', 'png', 'jpeg'))):
+            os.remove('./data/images/'+image)
+        elif os.path.getsize('./data/images/'+image) < 20 * 1024:
+            os.remove('./data/images/'+image)
+        else:
+            if image[0]=='o':
+                csv_list.append([image,0])
+            if image[0]=='p':
+                csv_list.append([image,1])
+    makeCSV(csv_list)
+
+
 def main():
     subreddit = 'photoshopbattles'
     limit = 30
@@ -94,6 +109,7 @@ def main():
     comment_limit = 5
     reddit = GetImages(subreddit, limit, search_filter,comment_limit)
     reddit.getPosts()
+    cleanImages()
         
 
 if __name__ == "__main__":
