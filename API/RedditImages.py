@@ -45,7 +45,7 @@ class GetImages:
                 percentComplete = str(int(100 * post_count/self.posts))
                 print('Getting comments',percentComplete, '%')
                 for count, commment in enumerate(resp_json[1]['data']['children']):
-                    if count == self.comment_limit: # count starts at 0
+                    if count >= self.comment_limit: # count starts at 0
                         break
                     else:    
                         try:
@@ -76,7 +76,7 @@ class GetImages:
                             pass       
             else:
                 print (resp.reason)
-        self.makeCSV(csv_array)
+        #self.makeCSV(csv_array)
         return csv_array
 
     def makeCSV(self, csv_array):
