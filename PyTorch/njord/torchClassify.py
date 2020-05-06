@@ -244,6 +244,6 @@ for epoch in range(1, n_epochs+1):
         print('Validation loss decreased ({:.6f} --> {:.6f}).  Saving model ...'.format(
         valid_loss_min,
         valid_loss))
-        torch.save(model.state_dict(), 'best_model.pt')
+        torch.save(model.state_dict(), './data/model/best_model.pt')
         valid_loss_min = valid_loss
 
