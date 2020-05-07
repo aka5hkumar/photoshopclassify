@@ -115,7 +115,7 @@ for idx in np.arange(15):
     ax = fig.add_subplot(2, 20/2, idx+1, xticks=[], yticks=[])
     imshow(images[idx])
     ax.set_title(classes[labels[idx]])
-plt.show()
+#plt.show()
 
 
 
@@ -123,13 +123,13 @@ class CNN(nn.Module):
     def __init__(self):
         super(CNN, self).__init__()
         # Convolutional Layer (sees 32x32x3 image tensor) 
-        self.conv1 = nn.Conv2d(in_channels=3, out_channels=16, kernel_size=3, padding=1)
+        self.conv1 = nn.Conv2d(in_channels=3, out_channels=64, kernel_size=4, padding=1)
         # Convolutional Layer (sees 16x16x16 image tensor)
-        self.conv2 = nn.Conv2d(16, 32, 3, padding=1)
+        self.conv2 = nn.Conv2d(64, 128, 4, padding=1)
         # Convolutional Layer (sees 8x8x32 image tensor)
-        self.conv3 = nn.Conv2d(32, 64, 3, padding=1)
+        self.conv3 = nn.Conv2d(128, 256, 4, padding=1)
         # Convolutional Layer (sees 4*4*64 image tensor)
-        self.conv4 = nn.Conv2d(64, 128, 3, padding=1)
+        self.conv4 = nn.Conv2d(256, 512, 4, padding=1)
         # Maxpooling Layer
         self.pool = nn.MaxPool2d(2, 2)
         # Linear Fully-Connected Layer 1 (sees 2*2*128 image tensor)
@@ -179,7 +179,7 @@ criterion = nn.CrossEntropyLoss()
 optimizer = optim.Adamax(model.parameters(), lr=0.001)
 
 # number of epochs to train the model
-n_epochs = 10
+n_epochs = 15
 
 valid_loss_min = np.Inf # track change in validation loss
 
@@ -244,6 +244,6 @@ for epoch in range(1, n_epochs+1):
         print('Validation loss decreased ({:.6f} --> {:.6f}).  Saving model ...'.format(
         valid_loss_min,
         valid_loss))
-        torch.save(model.state_dict(), './data/model/best_model.pt')
+        torch.save(model.state_dict(), './data/best_model.pt')
         valid_loss_min = valid_loss
 
