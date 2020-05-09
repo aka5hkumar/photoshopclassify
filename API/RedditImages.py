@@ -35,9 +35,8 @@ class GetImages:
                     except OSError:
                         print('Error on',post_img, 'skipping')
                         pass
-                if self.post_limit > 0:
-                    print(self.post_limit, 'posts remaining')
-                    self.post_limit = self.post_limit-len(resp_json['data']['children'])
+                print(self.post_limit, 'posts remaining')
+                self.post_limit = self.post_limit-len(resp_json['data']['children'])
                 self.getPosts(after, posts_dict, csv_array)
             else:
                 print (resp.reason)
@@ -77,7 +76,7 @@ class GetImages:
                                 os.makedirs(os.path.dirname(filepath+filename), exist_ok=True)
                                 open(filepath+filename, 'wb').write(image.content)
                                 csv_array.append([filename.split('.')[0], 1])
-                        except: #(IndexError, KeyError):
+                        except (IndexError, KeyError):
                             count -= 1
                             pass       
             else:
@@ -92,9 +91,15 @@ def makeCSV(csv_array):
         print ('Writing CSV')
         #Does not remove duplicates!
 
+def defineCSV():
+    csv_list=[]
+    if image[0]=='o':
+        csv_list.append([image,0])
+    if image[0]=='p':
+        csv_list.append([image,1])
+    return csv_list
 
 def cleanImages():
-    csv_list=[]
     for image in os.listdir('./data/images/'):
         if not (image.endswith(('jpg', 'png', 'jpeg'))):
             try: 
@@ -106,12 +111,7 @@ def cleanImages():
                 os.remove('./data/images/'+image)
             except PermissionError:
                 shutil.rmtree('./data/images/'+image, ignore_errors=True)
-        else:
-            if image[0]=='o':
-                csv_list.append([image,0])
-            if image[0]=='p':
-                csv_list.append([image,1])
-    makeCSV(csv_list)
+    return True
 
 
 def main():
@@ -121,7 +121,8 @@ def main():
     comment_limit = 10
     reddit = GetImages(subreddit, limit, search_filter,comment_limit)
     reddit.getPosts()
-    cleanImages()
+    if cleanImages():
+        makeCSV(defineCSV())
         
 
 if __name__ == "__main__":
