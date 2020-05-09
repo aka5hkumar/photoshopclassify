@@ -26,7 +26,7 @@ print(f"Train Size: {len(os.listdir('./data/images/'))}")
 
 # Data paths
 train_path = 'data/images/'
-test_path = 'data/images/'
+
 
 # Our own custom class for datasets
 class CreateDataset(Dataset):
@@ -58,7 +58,6 @@ transforms_train = transforms.Compose([
 
 
 train_data = CreateDataset(df_data=train_df, data_dir=train_path, transform=transforms_train)
-#test_data = CreateDataset(df_data=test_df, data_dir=test_path, transform=transforms_train)
 
 
 batch_size = 64
@@ -154,7 +153,7 @@ class CNN(nn.Module):
         # add dropout layer
         x = self.dropout(x)
         # add 2nd hidden layer, with relu activation function
-        x = self.fc2(x)
+        x = F.relu(self.fc2(x))
         return x
 
         # check if CUDA is available
@@ -179,7 +178,7 @@ criterion = nn.CrossEntropyLoss()
 optimizer = optim.Adamax(model.parameters(), lr=0.001)
 
 # number of epochs to train the model
-n_epochs = 15
+n_epochs = 7
 
 valid_loss_min = np.Inf # track change in validation loss
 
@@ -246,4 +245,11 @@ for epoch in range(1, n_epochs+1):
         valid_loss))
         torch.save(model.state_dict(), './data/best_model.pt')
         valid_loss_min = valid_loss
+
+
+plt.plot(train_losses, label='Training loss')
+plt.plot(valid_losses, label='Validation loss')
+plt.xlabel("Epochs")
+plt.ylabel("Loss")
+plt.legend(frameon=False)
 
