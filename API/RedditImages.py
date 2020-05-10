@@ -93,10 +93,11 @@ def makeCSV(csv_array):
 
 def defineCSV():
     csv_list=[]
-    if image[0]=='o':
-        csv_list.append([image,0])
-    if image[0]=='p':
-        csv_list.append([image,1])
+    for image in os.listdir('./data/images/'):
+        if image[0]=='o':
+            csv_list.append([image,0])
+        if image[0]=='p':
+            csv_list.append([image,1])
     return csv_list
 
 def cleanImages():
