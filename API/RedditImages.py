@@ -117,9 +117,9 @@ def cleanImages():
         elif image.endswith('png'):
             pngImage=Image.open('./data/images/'+image)
             if not pngImage.mode == 'RGB':
-                pngImage.convert('RGB')
+                pngImage=pngImage.convert('RGB')
                 print(pngImage)
-            pngImage.save('./data/images/'+image)
+                pngImage.save('./data/images/'+image)
 
 
 def main():
