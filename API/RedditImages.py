@@ -121,7 +121,6 @@ def cleanImages():
                 pngImage.save(image)
             except FileNotFoundError:
                 pass
-    return True
 
 
 def main():
@@ -132,8 +131,8 @@ def main():
     # comment_limit = 5
     # reddit = GetImages(subreddit, limit, search_filter,toptime,comment_limit)
     # reddit.getPosts()
-    if cleanImages():
-        makeCSV(defineCSV())
+    cleanImages()
+    makeCSV(defineCSV())
         
 
 if __name__ == "__main__":
