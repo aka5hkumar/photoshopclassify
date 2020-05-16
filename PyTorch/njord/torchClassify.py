@@ -49,7 +49,7 @@ class CreateDataset(Dataset):
 
 transforms_train = transforms.Compose([
     transforms.ToPILImage(),
-    transforms.Resize((32,32)),
+    transforms.Resize((150,150)),
     transforms.RandomHorizontalFlip(),
     transforms.RandomRotation(10),
     transforms.ToTensor(),
@@ -60,7 +60,7 @@ transforms_train = transforms.Compose([
 train_data = CreateDataset(df_data=train_df, data_dir=train_path, transform=transforms_train)
 
 
-batch_size = 64
+batch_size = 16
 
 # Percentage of training set to use as validation
 valid_size = 0.2
@@ -132,11 +132,11 @@ class CNN(nn.Module):
         # Maxpooling Layer
         self.pool = nn.MaxPool2d(2, 2)
         # Linear Fully-Connected Layer 1 (sees 2*2*128 image tensor)
-        self.fc1 = nn.Linear(128*2*2, 512)
+        self.fc1 = nn.Linear(128*9*9, 512)
         # Linear FC Layer 2
         self.fc2 = nn.Linear(512, 2)
         # Set Dropout
-        self.dropout = nn.Dropout(0.2)
+        self.dropout = nn.Dropout(0.2) #([64, 128, 9, 9])
         # Set Sigmoid
         self.sig=nn.Sigmoid()
         
@@ -147,7 +147,7 @@ class CNN(nn.Module):
         x = self.pool(F.relu(self.conv3(x)))
         x = self.pool(F.relu(self.conv4(x)))
         # flatten image input
-        x = x.view(-1, 128 * 2 * 2)
+        x = x.view(-1, 128 * 9 * 9)
         # add dropout layer
         x = self.dropout(x)
         # add 1st hidden layer, with relu activation function
@@ -157,7 +157,6 @@ class CNN(nn.Module):
         # add 2nd hidden layer, with relu activation function
         x = self.fc2(x)
         # sigmoid to squash
-        x = self.sig(x)
         return x
 
         # check if CUDA is available
