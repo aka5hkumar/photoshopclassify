@@ -115,14 +115,11 @@ def cleanImages():
             except PermissionError:
                 shutil.rmtree('./data/images/'+image, ignore_errors=True)
         elif image.endswith('png'):
-            print(image)
-            try:
-                pngImage=Image.open(image)
-                if not pngImage.mode == 'RGB':
-                    pngImage.convert('RGB')
-                pngImage.save(image)
-            except FileNotFoundError:
-                pass
+            pngImage=Image.open('./data/images/'+image)
+            if not pngImage.mode == 'RGB':
+                pngImage.convert('RGB')
+                print(pngImage)
+            pngImage.save('./data/images/'+image)
 
 
 def main():
