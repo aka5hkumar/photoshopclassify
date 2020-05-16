@@ -118,7 +118,8 @@ def cleanImages():
             print(image)
             try:
                 pngImage=Image.open(image)
-                pngImage.convert('RGB')
+                if not pngImage.mode == 'RGB':
+                    pngImage.convert('RGB')
                 pngImage.save(image)
             except FileNotFoundError:
                 pass
