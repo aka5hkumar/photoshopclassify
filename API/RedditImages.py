@@ -3,6 +3,7 @@ import os
 import imgur_downloader as Imgur
 import csv
 import shutil
+from PIL import Image
 
 class GetImages:
     def __init__(self, subreddit, post_limit, search_filter, top_time, comment_limit=float('inf')):
@@ -113,17 +114,24 @@ def cleanImages():
                 os.remove('./data/images/'+image)
             except PermissionError:
                 shutil.rmtree('./data/images/'+image, ignore_errors=True)
+        elif image.endswith('png'):
+            try:
+                pngImage=Image.open(image)
+                pngImage.convert('RGB')
+                pngImage.save(image)
+            except FileNotFoundError:
+                pass
     return True
 
 
 def main():
-    subreddit = 'photoshopbattles'
-    limit = 5
-    search_filter = 'top'
-    toptime = 'week'
-    comment_limit = 5
-    reddit = GetImages(subreddit, limit, search_filter,toptime,comment_limit)
-    reddit.getPosts()
+    # subreddit = 'photoshopbattles'
+    # limit = 5
+    # search_filter = 'top'
+    # toptime = 'week'
+    # comment_limit = 5
+    # reddit = GetImages(subreddit, limit, search_filter,toptime,comment_limit)
+    # reddit.getPosts()
     if cleanImages():
         makeCSV(defineCSV())
         
