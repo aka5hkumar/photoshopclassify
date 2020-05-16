@@ -122,13 +122,13 @@ class CNN(nn.Module):
     def __init__(self):
         super(CNN, self).__init__()
         # Convolutional Layer (sees 32x32x3 image tensor) 
-        self.conv1 = nn.Conv2d(in_channels=3, out_channels=64, kernel_size=4, padding=1)
+        self.conv1 = nn.Conv2d(in_channels=3, out_channels=16, kernel_size=3, padding=1)
         # Convolutional Layer (sees 16x16x16 image tensor)
-        self.conv2 = nn.Conv2d(64, 128, 4, padding=1)
+        self.conv2 = nn.Conv2d(16, 32, 3, padding=1)
         # Convolutional Layer (sees 8x8x32 image tensor)
-        self.conv3 = nn.Conv2d(128, 256, 4, padding=1)
+        self.conv3 = nn.Conv2d(32, 64, 3, padding=1)
         # Convolutional Layer (sees 4*4*64 image tensor)
-        self.conv4 = nn.Conv2d(256, 512, 4, padding=1)
+        self.conv4 = nn.Conv2d(64, 128, 3, padding=1)
         # Maxpooling Layer
         self.pool = nn.MaxPool2d(2, 2)
         # Linear Fully-Connected Layer 1 (sees 2*2*128 image tensor)
@@ -137,6 +137,8 @@ class CNN(nn.Module):
         self.fc2 = nn.Linear(512, 2)
         # Set Dropout
         self.dropout = nn.Dropout(0.2)
+        # Set Sigmoid
+        self.sig=nn.Sigmoid()
         
     def forward(self, x):
         # add sequence of convolutional and max pooling layers
@@ -153,7 +155,9 @@ class CNN(nn.Module):
         # add dropout layer
         x = self.dropout(x)
         # add 2nd hidden layer, with relu activation function
-        x = F.relu(self.fc2(x))
+        x = self.fc2(x)
+        # sigmoid to squash
+        x = self.sig(x)
         return x
 
         # check if CUDA is available
@@ -178,13 +182,14 @@ criterion = nn.CrossEntropyLoss()
 optimizer = optim.Adamax(model.parameters(), lr=0.001)
 
 # number of epochs to train the model
-n_epochs = 7
+n_epochs = 50
 
 valid_loss_min = np.Inf # track change in validation loss
 
 # keeping track of losses as it happen
 train_losses = []
 valid_losses = []
+not_learning=0
 
 for epoch in range(1, n_epochs+1):
 
@@ -245,8 +250,11 @@ for epoch in range(1, n_epochs+1):
         valid_loss))
         torch.save(model.state_dict(), './data/best_model.pt')
         valid_loss_min = valid_loss
-
-
+        not_learning=0
+    else:
+        not_learning+=1
+        if not_learning==3:
+            break
 plt.plot(train_losses, label='Training loss')
 plt.plot(valid_losses, label='Validation loss')
 plt.xlabel("Epochs")
