@@ -5,22 +5,23 @@ import csv
 import shutil
 
 class GetImages:
-    def __init__(self, subreddit, post_limit, search_filter, comment_limit=float('inf')):
+    def __init__(self, subreddit, post_limit, search_filter, top_time, comment_limit=float('inf')):
         self.url = 'https://www.reddit.com/r/'+subreddit
         self.post_limit = post_limit
         self.posts = post_limit
         self.comment_limit = comment_limit
         self.filter = search_filter
-
+        self.top_time = top_time
     def getPosts(self, after='', posts_dict={}, csv_array=[]):
         if self.post_limit<=0:
             self.getComments(posts_dict, csv_array) 
         else:
-            resp = requests.get(self.url+'/'+self.filter+'/.json?sort='+self.filter+'&t=all&after='+after, headers = {'User-agent': 'photoshopbot2'})
+            resp = requests.get(self.url+'/'+self.filter+'/.json?sort='+self.filter+'&t='+self.top_time+'&after='+after, headers = {'User-agent': 'photoshopbot2'})
             if resp.ok:
                 print('Getting posts')
                 resp_json=resp.json()
                 after = resp_json['data']['after']
+                print(self.url+'/'+self.filter+'/.json?sort='+self.filter+'&t=all&after='+after)
                 for count in range((min(self.post_limit,len(resp_json['data']['children'])))):
                     post_id=resp_json['data']['children'][count]['data']['id']# get ID
                     post_img=resp_json['data']['children'][count]['data']['url']# get img link
@@ -117,10 +118,11 @@ def cleanImages():
 
 def main():
     subreddit = 'photoshopbattles'
-    limit = 55
+    limit = 5
     search_filter = 'top'
-    comment_limit = 10
-    reddit = GetImages(subreddit, limit, search_filter,comment_limit)
+    toptime = 'week'
+    comment_limit = 5
+    reddit = GetImages(subreddit, limit, search_filter,toptime,comment_limit)
     reddit.getPosts()
     if cleanImages():
         makeCSV(defineCSV())
