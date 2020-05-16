@@ -115,6 +115,7 @@ def cleanImages():
             except PermissionError:
                 shutil.rmtree('./data/images/'+image, ignore_errors=True)
         elif image.endswith('png'):
+            print(image)
             try:
                 pngImage=Image.open(image)
                 pngImage.convert('RGB')
